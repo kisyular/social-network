@@ -9,6 +9,10 @@ const PostSchema = new Schema({
     type: String,
     required: true
   },
+  title: {
+    type: String,
+    required: true
+  },
   name: {
     type: String
   },
@@ -16,6 +20,14 @@ const PostSchema = new Schema({
     type: String
   },
   likes: [
+    {
+      user: {
+        type: Schema.Types.ObjectId
+      }
+    }
+  ],
+
+  dislikes: [
     {
       user: {
         type: Schema.Types.ObjectId

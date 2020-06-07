@@ -1,43 +1,46 @@
 const express = require('express');
 const router = express.Router();
-// const { check, validationResult } = require('express-validator');
-// const auth = require('../../middleware/auth');
-//
-// const Post = require('../../models/Post');
-// const User = require('../../models/User');
-// const checkObjectId = require('../../middleware/checkObjectId');
+const {check, validationResult} = require('express-validator');
+const auth = require('../../middleware/auth');
+
+const Post = require('../../models/Post');
+const User = require('../../models/User');
+const checkObjectId = require('../../middleware/checkObjectId');
 
 // @route    POST api/posts
 // @desc     Create a post
 // @access   Private
 router.post(
     '/',
-    // [auth, [check('text', 'Text is required').not().isEmpty()]],
+    [auth, [check('text', 'Text is required').not().isEmpty(),
+        check('title', 'Title is required').not().isEmpty()]],
+
     async (req, res) => {
-        res.send("Create Post Router")
-        //
-        // const errors = validationResult(req);
-        // if (!errors.isEmpty()) {
-        //     return res.status(400).json({errors: errors.array()});
-        // }
-        //
-        // try {
-        //     const user = await User.findById(req.user.id).select('-password');
-        //
-        //     const newPost = new Post({
-        //         text: req.body.text,
-        //         name: user.name,
-        //         avatar: user.avatar,
-        //         user: req.user.id
-        //     });
-        //
-        //     const post = await newPost.save();
-        //
-        //     res.json(post);
-        // } catch (err) {
-        //     console.error(err.message);
-        //     res.status(500).send('Server Error');
-        // }
+        // res.send("Create Post Router")
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({errors: errors.array()});
+        }
+
+        try {
+            const user = await User.findById(req.user.id).select('-password');
+
+            const newPost = new Post({
+                title: req.body.text,
+                text: req.body.text,
+                name: user.name,
+                avatar: user.avatar,
+                user: req.user.id
+            });
+
+            const post = await newPost.save();
+
+            res.json(post);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
     }
 );
 
@@ -45,18 +48,18 @@ router.post(
 // @desc     Get all posts
 // @access   Private
 router.get('/',
-    // auth,
+    auth,
     async (req, res) => {
-    res.send("Get All Posts Router");
+        // res.send("Get All Posts Router");
 
-    // try {
-    //     const posts = await Post.find().sort({date: -1});
-    //     res.json(posts);
-    // } catch (err) {
-    //     console.error(err.message);
-    //     res.status(500).send('Server Error');
-    // }
-});
+        try {
+            const posts = await Post.find().sort({date: -1});
+            res.json(posts);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+    });
 
 // @route    GET api/posts/:id
 // @desc     Get post by ID
@@ -64,140 +67,200 @@ router.get('/',
 router.get('/:id',
     // [auth, checkObjectId('id')],
     async (req, res) => {
-        res.send("Get Post by ID Router")
+        // res.send("Get Post by ID Router")
 
-        // try {
-    //     const post = await Post.findById(req.params.id);
-    //
-    //     res.json(post);
-    // } catch (err) {
-    //     console.error(err.message);
-    //
-    //     res.status(500).send('Server Error');
-    // }
-});
+        try {
+            const post = await Post.findById(req.params.id);
+
+            res.json(post);
+        } catch (err) {
+            console.error(err.message);
+
+            res.status(500).send('Server Error');
+        }
+    });
 
 // @route    DELETE api/posts/:id
 // @desc     Delete a post
 // @access   Private
 router.delete('/:id',
-    // [auth, checkObjectId('id')],
+    [auth, checkObjectId('id')],
     async (req, res) => {
-    res.send("Delete Post by ID Router")
+        // res.send("Delete Post by ID Router")
 
-    // try {
-    //     const post = await Post.findById(req.params.id);
-    //
-    //     // Check user
-    //     if (post.user.toString() !== req.user.id) {
-    //         return res.status(401).json({msg: 'User not authorized'});
-    //     }
-    //
-    //     await post.remove();
-    //
-    //     res.json({msg: 'Post removed'});
-    // } catch (err) {
-    //     console.error(err.message);
-    //
-    //     res.status(500).send('Server Error');
-    // }
-});
+        try {
+            const post = await Post.findById(req.params.id);
+
+            // Check user
+            if (post.user.toString() !== req.user.id) {
+                return res.status(401).json({msg: 'User not authorized'});
+            }
+
+            await post.remove();
+
+            res.json({msg: 'Post removed'});
+        } catch (err) {
+            console.error(err.message);
+
+            res.status(500).send('Server Error');
+        }
+    });
 
 // @route    PUT api/posts/like/:id
 // @desc     Like a post
 // @access   Private
 router.put('/like/:id',
-    // [auth, checkObjectId('id')],
+    [auth, checkObjectId('id')],
     async (req, res) => {
-    res.send("Like Post by ID Router")
+        // res.send("Like Post by ID Router")
 
-    // try {
-    //     const post = await Post.findById(req.params.id);
-    //
-    //     // Check if the post has already been liked
-    //     if (post.likes.some((like) => like.user.toString() === req.user.id)) {
-    //         return res.status(400).json({msg: 'Post already liked'});
-    //     }
-    //
-    //     post.likes.unshift({user: req.user.id});
-    //
-    //     await post.save();
-    //
-    //     return res.json(post.likes);
-    // } catch (err) {
-    //     console.error(err.message);
-    //     res.status(500).send('Server Error');
-    // }
-});
+        try {
+            const post = await Post.findById(req.params.id);
+
+            // Check if the post has already been liked
+            if (post.likes.some((like) => like.user.toString() === req.user.id)) {
+                return res.status(400).json({msg: 'Post already been liked'});
+            }
+
+            post.likes.unshift({user: req.user.id});
+
+            await post.save();
+
+            return res.json(post.likes);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+    });
+
+
+// @route    PUT api/posts/like/:id
+// @desc     Dislike a post
+// @access   Private
+router.put('/dislike/:id',
+    [auth, checkObjectId('id')],
+    async (req, res) => {
+        // res.send("Dislike Post by ID Router")
+
+        try {
+            const post = await Post.findById(req.params.id);
+
+            // Check if the post has already been disliked
+            if (post.dislikes.some((dislike) => dislike.user.toString() === req.user.id)) {
+                return res.status(400).json({msg: 'Post already been disliked'});
+            }
+
+            post.dislikes.unshift({user: req.user.id});
+
+            await post.save();
+
+            return res.json(post.dislikes);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+    });
 
 // @route    PUT api/posts/unlike/:id
 // @desc     Unlike a post
 // @access   Private
 router.put('/unlike/:id',
-    // [auth, checkObjectId('id')],
+    [auth, checkObjectId('id')],
     async (req, res) => {
-        res.send("Unlike Post by ID Router")
+        // res.send("Unlike Post by ID Router")
 
-        // try {
-    //     const post = await Post.findById(req.params.id);
-    //
-    //     // Check if the post has not yet been liked
-    //     if (!post.likes.some((like) => like.user.toString() === req.user.id)) {
-    //         return res.status(400).json({msg: 'Post has not yet been liked'});
-    //     }
-    //
-    //     // remove the like
-    //     post.likes = post.likes.filter(
-    //         ({user}) => user.toString() !== req.user.id
-    //     );
-    //
-    //     await post.save();
-    //
-    //     return res.json(post.likes);
-    // } catch (err) {
-    //     console.error(err.message);
-    //     res.status(500).send('Server Error');
-    // }
-});
+        try {
+            const post = await Post.findById(req.params.id);
+
+            // Check if the post has not yet been liked
+            if (!post.likes.some((like) => like.user.toString() === req.user.id)) {
+                return res.status(400).json({msg: 'Post has not yet been liked'});
+            }
+
+            // remove the like
+            post.likes = post.likes.filter(
+                ({user}) => user.toString() !== req.user.id
+            );
+
+            await post.save();
+
+            return res.json(post.likes);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+    });
+
+
+
+// @route    PUT api/posts/undislike/:id
+// @desc     Unlike a post
+// @access   Private
+router.put('/undislike/:id',
+    [auth, checkObjectId('id')],
+    async (req, res) => {
+        // res.send("Undislike Post by ID Router")
+
+        try {
+            const post = await Post.findById(req.params.id);
+
+            // Check if the post has not yet been liked
+            if (!post.dislikes.some((dislike) => dislike.user.toString() === req.user.id)) {
+                return res.status(400).json({msg: 'Post has not yet been disliked'});
+            }
+
+            // remove the like
+            post.dislikes = post.dislikes.filter(
+                ({user}) => user.toString() !== req.user.id
+            );
+
+            await post.save();
+
+            return res.json(post.dislikes);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
+    });
 
 // @route    POST api/posts/comment/:id
 // @desc     Comment on a post
 // @access   Private
 router.post(
     '/comment/:id',
-    // [
-    //     auth,
-    //     checkObjectId('id'),
-    //     [check('text', 'Text is required').not().isEmpty()]
-    // ],
+    [
+        auth,
+        checkObjectId('id'),
+        [check('text', 'Text is required').not().isEmpty()]
+    ],
     async (req, res) => {
-        res.send("Comment Post by ID Router")
+        // res.send("Comment Post by ID Router")
 
-        // const errors = validationResult(req);
-        // if (!errors.isEmpty()) {
-        //     return res.status(400).json({errors: errors.array()});
-        // }
-        //
-        // try {
-        //     const user = await User.findById(req.user.id).select('-password');
-        //     const post = await Post.findById(req.params.id);
-        //
-        //     const newComment = {
-        //         text: req.body.text,
-        //         name: user.name,
-        //         avatar: user.avatar,
-        //         user: req.user.id
-        //     };
-        //
-        //     post.comments.unshift(newComment);
-        //
-        //     await post.save();
-        //
-        //     res.json(post.comments);
-        // } catch (err) {
-        //     console.error(err.message);
-        //     res.status(500).send('Server Error');
-        // }
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({errors: errors.array()});
+        }
+
+        try {
+            const user = await User.findById(req.user.id).select('-password');
+            const post = await Post.findById(req.params.id);
+
+            const newComment = {
+                text: req.body.text,
+                name: user.name,
+                avatar: user.avatar,
+                user: req.user.id
+            };
+
+            post.comments.unshift(newComment);
+
+            await post.save();
+
+            res.json(post.comments);
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error');
+        }
     }
 );
 
@@ -209,33 +272,33 @@ router.delete('/comment/:id/:comment_id',
     async (req, res) => {
         res.send("Delete CommentPost by ID Router")
 
-        // try {
-    //     const post = await Post.findById(req.params.id);
-    //
-    //     // Pull out comment
-    //     const comment = post.comments.find(
-    //         (comment) => comment.id === req.params.comment_id
-    //     );
-    //     // Make sure comment exists
-    //     if (!comment) {
-    //         return res.status(404).json({msg: 'Comment does not exist'});
-    //     }
-    //     // Check user
-    //     if (comment.user.toString() !== req.user.id) {
-    //         return res.status(401).json({msg: 'User not authorized'});
-    //     }
-    //
-    //     post.comments = post.comments.filter(
-    //         ({id}) => id !== req.params.comment_id
-    //     );
-    //
-    //     await post.save();
-    //
-    //     return res.json(post.comments);
-    // } catch (err) {
-    //     console.error(err.message);
-    //     return res.status(500).send('Server Error');
-    // }
-});
+        try {
+            const post = await Post.findById(req.params.id);
+
+            // Pull out comment
+            const comment = post.comments.find(
+                (comment) => comment.id === req.params.comment_id
+            );
+            // Make sure comment exists
+            if (!comment) {
+                return res.status(404).json({msg: 'Comment does not exist'});
+            }
+            // Check user
+            if (comment.user.toString() !== req.user.id) {
+                return res.status(401).json({msg: 'User not authorized'});
+            }
+
+            post.comments = post.comments.filter(
+                ({id}) => id !== req.params.comment_id
+            );
+
+            await post.save();
+
+            return res.json(post.comments);
+        } catch (err) {
+            console.error(err.message);
+            return res.status(500).send('Server Error');
+        }
+    });
 
 module.exports = router;
